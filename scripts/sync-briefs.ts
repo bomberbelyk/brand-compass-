@@ -27,12 +27,14 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 const BRIEFS_DIR = path.join(process.cwd(), "briefs");
 
 function slugify(name: string): string {
+  // Keep Latin and Cyrillic, lowercase, spaces → dashes
   return name
     .toLowerCase()
-    .replace(/[^\w\s-]/g, "")
+    .replace(/[^\p{L}\p{N}\s-]/gu, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
-    .slice(0, 40);
+    .slice(0, 40)
+    .replace(/^-+|-+$/g, "");
 }
 
 function sessionStatus(session: {
@@ -40,7 +42,7 @@ function sessionStatus(session: {
   current_stage: string;
   last_activity_at: string | null;
 }): { emoji: string; label: string } {
-  if (session.status === "completed" || session.current_stage === "completed") {
+  if (session.status === "completed" || session.current_stage === "completed" || session.current_stage === "completed_exit") {
     return { emoji: "✅", label: "completed" };
   }
   // No activity in the last 48 hours → interrupted
@@ -89,7 +91,8 @@ async function run() {
   for (const session of sessions ?? []) {
     const date = new Date(session.created_at).toISOString().slice(0, 10);
     const slug = slugify(session.client_name ?? "") || "unnamed";
-    const dirName = `${date}-${slug}`;
+    const shortId = session.id.slice(0, 6);
+    const dirName = `${date}-${slug}-${shortId}`;
     const dirPath = path.join(BRIEFS_DIR, dirName);
 
     if (!fs.existsSync(dirPath)) {
@@ -138,20 +141,20 @@ ${formatMessages(visibleMessages)}
     // ── brief.md (only if generated) ─────────────────────────────
     const { data: doc } = await supabase
       .from("generated_documents")
-      .select("content, created_at")
+      .select("content_markdown, created_at")
       .eq("session_id", session.id)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    if (doc?.content) {
+    if (doc?.content_markdown) {
       const briefContent = `# Brief — ${session.client_name ?? "Unnamed"}
 
 _Generated: ${new Date(doc.created_at).toISOString().slice(0, 16).replace("T", " ")} UTC_
 
 ---
 
-${doc.content}
+${doc.content_markdown}
 `;
       fs.writeFileSync(path.join(dirPath, "brief.md"), briefContent);
     }
