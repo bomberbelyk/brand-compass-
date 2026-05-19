@@ -2,6 +2,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { streamInterviewResponse, generateExitSummary } from "./interviewService";
 import { analyzeAnswer } from "./analysisService";
 import { generateClientBrief } from "./documentService";
+import { pushSessionToGitHub } from "@/lib/github";
 
 // ─── GitHub Actions sync trigger ──────────────────────────────────────────────
 
@@ -116,7 +117,7 @@ export async function streamClientMessage(
   // Load session state immediately — before streaming starts
   const { data: session, error: sessionError } = await supabase
     .from("client_sessions")
-    .select("id, client_email, client_name, current_stage, state_json, working_context_markdown, readiness_score, readiness_level")
+    .select("id, client_email, client_name, current_stage, state_json, working_context_markdown, readiness_score, readiness_level, created_at")
     .eq("id", sessionId)
     .single();
 
@@ -255,6 +256,44 @@ export async function streamClientMessage(
           } catch (briefErr) {
             console.error("[brief] generateClientBrief failed:", briefErr);
           }
+        }
+
+        // Push session state + brief (if generated) to GitHub (fire and forget)
+        if (shouldGenerateBrief && briefToken) {
+          supabase
+            .from("generated_documents")
+            .select("content_markdown")
+            .eq("session_id", sessionId)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle()
+            .then(({ data }) => {
+              pushSessionToGitHub({
+                sessionId,
+                clientName: session.client_name,
+                clientEmail: session.client_email,
+                createdAt: (session as Record<string, unknown>).created_at as string ?? now,
+                lastActivityAt: now,
+                currentStage: nextStage,
+                readinessScore: analysis.readinessScore,
+                readinessLevel: analysis.readinessLevel,
+                messages: history.map(m => ({ role: m.role, content: m.content })),
+                briefContent: data?.content_markdown ?? null,
+              }).catch(e => console.warn("[github] push failed:", e));
+            });
+        } else {
+          pushSessionToGitHub({
+            sessionId,
+            clientName: session.client_name,
+            clientEmail: session.client_email,
+            createdAt: (session as Record<string, unknown>).created_at as string ?? now,
+            lastActivityAt: now,
+            currentStage: nextStage,
+            readinessScore: analysis.readinessScore,
+            readinessLevel: analysis.readinessLevel,
+            messages: history.map(m => ({ role: m.role, content: m.content })),
+            briefContent: null,
+          }).catch(e => console.warn("[github] push failed:", e));
         }
 
         // Send metadata frame at end of stream
