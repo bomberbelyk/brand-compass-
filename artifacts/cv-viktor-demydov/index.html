@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CV — Віктор Демидов</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 0;
+    }
+
+    :root {
+      --paper: #fbfaf7;
+      --ink: #171717;
+      --muted: #66645f;
+      --hairline: #d9d2c5;
+      --olive: #556044;
+      --wine: #7b2f35;
+      --steel: #2d4650;
+      --panel: #f3efe7;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #e7e2d8;
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.35;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .sheet {
+      width: 210mm;
+      height: 297mm;
+      margin: 0 auto;
+      background: var(--paper);
+      position: relative;
+      overflow: hidden;
+      padding: 15mm 16mm 13mm;
+      page-break-after: always;
+    }
+
+    .sheet::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 5.5mm;
+      background: linear-gradient(180deg, var(--steel), var(--olive) 54%, var(--wine));
+    }
+
+    .masthead {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12mm;
+      align-items: start;
+      padding-bottom: 8mm;
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    h1 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 34pt;
+      line-height: 0.95;
+      font-weight: 500;
+      letter-spacing: 0;
+    }
+
+    .role {
+      margin-top: 5mm;
+      max-width: 122mm;
+      color: var(--steel);
+      font-size: 12pt;
+      font-weight: 650;
+      line-height: 1.32;
+    }
+
+    .contacts {
+      text-align: right;
+      font-size: 9pt;
+      color: var(--muted);
+      white-space: nowrap;
+      padding-top: 1.5mm;
+    }
+
+    .contacts div + div {
+      margin-top: 1.4mm;
+    }
+
+    .section {
+      margin-top: 7mm;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 3mm;
+      margin: 0 0 3.2mm;
+      color: var(--wine);
+      font-size: 8.6pt;
+      font-weight: 800;
+      letter-spacing: 0.9px;
+      text-transform: uppercase;
+    }
+
+    .section-title::after {
+      content: "";
+      height: 1px;
+      flex: 1;
+      background: var(--hairline);
+    }
+
+    p {
+      margin: 0;
+      font-size: 9.35pt;
+      color: #262522;
+    }
+
+    p + p {
+      margin-top: 2.6mm;
+    }
+
+    .lead {
+      font-size: 11.3pt;
+      line-height: 1.42;
+      color: #20201e;
+    }
+
+    .quote-box {
+      margin-top: 6mm;
+      padding: 5mm 6mm;
+      background: var(--panel);
+      border-left: 1.6mm solid var(--olive);
+    }
+
+    .quote-box p {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 13.2pt;
+      line-height: 1.34;
+      color: #20201e;
+    }
+
+    .grid-two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7mm;
+    }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2.1mm;
+      margin-top: 3.5mm;
+    }
+
+    .pill {
+      border: 1px solid #c9c1b2;
+      border-radius: 999px;
+      padding: 1.4mm 2.6mm;
+      font-size: 7.8pt;
+      color: #2e2c28;
+      background: rgba(255, 255, 255, 0.46);
+    }
+
+    .list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 2.2mm;
+    }
+
+    .list li {
+      position: relative;
+      padding-left: 4.2mm;
+      font-size: 8.9pt;
+      color: #2b2a27;
+    }
+
+    .list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 1.65mm;
+      width: 1.7mm;
+      height: 1.7mm;
+      background: var(--olive);
+      border-radius: 50%;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 3.3mm;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 23mm 1fr;
+      gap: 4mm;
+      padding-bottom: 3.3mm;
+      border-bottom: 1px solid rgba(217, 210, 197, 0.76);
+    }
+
+    .item:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .date {
+      color: var(--steel);
+      font-size: 8pt;
+      font-weight: 750;
+    }
+
+    .item h3 {
+      margin: 0 0 1.1mm;
+      font-size: 9.55pt;
+      line-height: 1.2;
+    }
+
+    .item p {
+      font-size: 8.55pt;
+      color: #403e39;
+    }
+
+    .mini-card {
+      padding: 4.2mm;
+      background: #fffdf9;
+      border: 1px solid var(--hairline);
+    }
+
+    .mini-card h3 {
+      margin: 0 0 2mm;
+      color: var(--steel);
+      font-size: 9.2pt;
+    }
+
+    .mini-card p {
+      font-size: 8.35pt;
+    }
+
+    .first-90 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 3mm;
+      margin-top: 3.4mm;
+    }
+
+    .step {
+      min-height: 27mm;
+      padding: 3.6mm;
+      background: #fffdf9;
+      border: 1px solid var(--hairline);
+    }
+
+    .step strong {
+      display: block;
+      margin-bottom: 1.7mm;
+      color: var(--wine);
+      font-size: 8.4pt;
+    }
+
+    .step span {
+      display: block;
+      font-size: 7.85pt;
+      color: #393733;
+      line-height: 1.34;
+    }
+
+    .footer {
+      position: absolute;
+      right: 16mm;
+      bottom: 7mm;
+      left: 16mm;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid var(--hairline);
+      padding-top: 2.6mm;
+      color: #817b70;
+      font-size: 7.4pt;
+    }
+
+    .page-number {
+      color: var(--wine);
+      font-weight: 750;
+    }
+
+    @media screen {
+      body {
+        padding: 16px;
+      }
+
+      .sheet {
+        box-shadow: 0 18px 50px rgba(25, 22, 16, 0.18);
+        margin-bottom: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="sheet">
+      <header class="masthead">
+        <div>
+          <h1>Віктор<br />Демидов</h1>
+          <div class="role">Кандидат на посаду помічника директора Науково-дослідного інституту «Єнамін»</div>
+        </div>
+        <div class="contacts">
+          <div>+38 067 505 47 09</div>
+          <div>victor.demidov@gmail.com</div>
+          <div>Україна</div>
+        </div>
+      </header>
+
+      <section class="section">
+        <h2 class="section-title">Профіль</h2>
+        <p class="lead">Фахівець із великим досвідом у координації складних процесів, роботі з експертними командами, організації комунікацій, підготовці матеріалів, запуску проєктів і супроводі навчальних програм.</p>
+        <div class="quote-box">
+          <p>Моя сильна сторона — швидко розуміти складні середовища, знаходити в них структуру і перетворювати розрізнені процеси на зрозумілу систему.</p>
+        </div>
+      </section>
+
+      <section class="section grid-two">
+        <div>
+          <h2 class="section-title">Чому ця роль</h2>
+          <p>Позиція помічника директора цікава мені як можливість застосувати досвід у науковому та освітньому середовищі: підтримувати операційний контур, документи, зустрічі, листування, внутрішні зв’язки, зовнішню комунікацію, презентаційні матеріали та навчальні ініціативи.</p>
+          <p>Я звик працювати там, де потрібно одночасно бачити людей, зміст, строки, документи, якість і кінцевий результат.</p>
+        </div>
+        <div>
+          <h2 class="section-title">Ключова цінність</h2>
+          <p>Я не є хіміком і не претендую на роль наукового експерта. Моя цінність — в організації складних процесів, роботі з експертами, структурі інформації, комунікації, підготовці матеріалів, запуску систем і швидкому навчанні.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 class="section-title">Професійні опори</h2>
+        <div class="pill-list">
+          <span class="pill">Операційна координація</span>
+          <span class="pill">Комунікації з експертами</span>
+          <span class="pill">Документи та звітність</span>
+          <span class="pill">Навчальні програми</span>
+          <span class="pill">Презентаційні матеріали</span>
+          <span class="pill">Проєктний супровід</span>
+          <span class="pill">Бюджети та дедлайни</span>
+          <span class="pill">AI-інструменти</span>
+          <span class="pill">Структурування інформації</span>
+          <span class="pill">Продакшен-мислення</span>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 class="section-title">Перші 90 днів</h2>
+        <p>У перший місяць я зосередився б на розумінні робочого ритму директора, типових задач, потоків документів, ключових контактів, регулярних зустрічей та слабких місць у комунікації.</p>
+        <div class="first-90">
+          <div class="step">
+            <strong>Місяць 1</strong>
+            <span>Карта задач, контактів, документів, зустрічей і регулярних процесів директора.</span>
+          </div>
+          <div class="step">
+            <strong>Місяць 2</strong>
+            <span>Шаблони листів, протоколів, резюме зустрічей, презентаційних та інформаційних матеріалів.</span>
+          </div>
+          <div class="step">
+            <strong>Місяць 3</strong>
+            <span>Система нагадувань, контролю домовленостей, зберігання документів і AI-підтримки рутини.</span>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>CV · Віктор Демидов</span>
+        <span class="page-number">1 / 2</span>
+      </footer>
+    </section>
+
+    <section class="sheet">
+      <header class="masthead">
+        <div>
+          <h1>Досвід<br />і система</h1>
+          <div class="role">Медіа, продакшен, навчальні програми, тактична медицина, AI-рішення для організаційних процесів</div>
+        </div>
+        <div class="contacts">
+          <div>Віктор Демидов</div>
+          <div>+38 067 505 47 09</div>
+          <div>victor.demidov@gmail.com</div>
+        </div>
+      </header>
+
+      <section class="section">
+        <h2 class="section-title">Професійний шлях</h2>
+        <div class="timeline">
+          <div class="item">
+            <div class="date">з 2022</div>
+            <div>
+              <h3>Координатор навчальних програм з тактичної медицини · Всеукраїнська рада реанімації</h3>
+              <p>Координація програм на перетині організації, навчання, методології, звітності та комунікації з інструкторами, партнерами й учасниками курсів.</p>
+            </div>
+          </div>
+          <div class="item">
+            <div class="date">з 2013</div>
+            <div>
+              <h3>Співпраця з Всеукраїнською радою реанімації</h3>
+              <p>Підтримка освітніх і комунікаційних процесів, робота з експертною спільнотою, матеріалами та організаційною логікою навчальних ініціатив.</p>
+            </div>
+          </div>
+          <div class="item">
+            <div class="date">2019</div>
+            <div>
+              <h3>Керівник документального відеопродакшену · Fedoriv</h3>
+              <p>Організація документального відеовиробництва, координація команд, змісту, дедлайнів і якості результату.</p>
+            </div>
+          </div>
+          <div class="item">
+            <div class="date">2008–2019</div>
+            <div>
+              <h3>Співвласник і директор власного продакшену рекламного візуалу</h3>
+              <p>Клієнтські проєкти, виробничі процеси, команди, документи, бюджети, дедлайни, партнери та комерційна відповідальність.</p>
+            </div>
+          </div>
+          <div class="item">
+            <div class="date">2000–2008</div>
+            <div>
+              <h3>Журналіст, фотограф, оператор, керівник фотослужби · УНІАН та комерційні команди</h3>
+              <p>Робота з інформацією, візуальною комунікацією, редакційними процесами, агентськими та продакшен-командами.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section grid-two">
+        <div class="mini-card">
+          <h3>Що можу взяти на себе</h3>
+          <ul class="list">
+            <li>Календар зустрічей і контроль домовленостей.</li>
+            <li>Листування українською та англійською.</li>
+            <li>Короткі протоколи й резюме зустрічей.</li>
+            <li>Структура зберігання документів.</li>
+            <li>База контактів і партнерів.</li>
+          </ul>
+        </div>
+        <div class="mini-card">
+          <h3>Сучасний інструментарій</h3>
+          <ul class="list">
+            <li>LLM та AI-підтримка рутинних процесів.</li>
+            <li>Автоматизація і структурування інформації.</li>
+            <li>Генерація зображень і дизайн-матеріалів.</li>
+            <li>Шаблони презентаційних та інформаційних матеріалів.</li>
+            <li>AI-рішення для навчання і корпоративних процесів.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section grid-two">
+        <div>
+          <h2 class="section-title">Освіта</h2>
+          <div class="timeline">
+            <div class="item">
+              <div class="date">2000</div>
+              <div>
+                <h3>Інститут журналістики КНУ імені Тараса Шевченка</h3>
+                <p>Вища освіта у сфері журналістики, інформації та комунікації.</p>
+              </div>
+            </div>
+            <div class="item">
+              <div class="date">2016</div>
+              <div>
+                <h3>Майстерня документального кіно Сергія Буковського</h3>
+                <p>Інститут підвищення кваліфікації при Держтелерадіо України.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h2 class="section-title">Формула для позиції</h2>
+          <p>Для Науково-дослідного інституту «Єнамін» я можу бути помічником директора, який поєднує адміністративну уважність, комунікаційний досвід, продакшен-мислення, навички координатора навчальних програм і сучасні AI-інструменти.</p>
+          <p>Мета — щоб директор витрачав менше часу на організаційну рутину і мав більше ясності в щоденних процесах.</p>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>Кандидат на посаду помічника директора НДІ «Єнамін»</span>
+        <span class="page-number">2 / 2</span>
+      </footer>
+    </section>
+  </main>
+</body>
+</html>

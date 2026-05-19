@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Віктор Демидов — CV</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 0;
+    }
+
+    :root {
+      --paper: #ffffff;
+      --ink: #1f2426;
+      --muted: #60696d;
+      --line: #dfe6e5;
+      --soft-line: #eef3f2;
+      --teal: #2b8a86;
+      --orange: #c9823a;
+      --pale: #f8fbfa;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #f2f5f4;
+      color: var(--ink);
+      font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+      line-height: 1.42;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      padding: 18mm 18mm 16mm;
+      background: var(--paper);
+      page-break-after: always;
+    }
+
+    .top {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16mm;
+      align-items: start;
+      padding-bottom: 9mm;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 31pt;
+      line-height: 1;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    .role {
+      max-width: 124mm;
+      margin-top: 5mm;
+      color: var(--teal);
+      font-size: 11.5pt;
+      line-height: 1.36;
+      font-weight: 650;
+    }
+
+    .contacts {
+      padding-top: 1mm;
+      text-align: right;
+      color: var(--muted);
+      font-size: 9.5pt;
+      line-height: 1.7;
+      white-space: nowrap;
+    }
+
+    .section {
+      margin-top: 8mm;
+    }
+
+    .section.compact {
+      margin-top: 6.5mm;
+    }
+
+    h2 {
+      display: flex;
+      align-items: center;
+      gap: 4mm;
+      margin: 0 0 3.4mm;
+      color: var(--teal);
+      font-size: 10.6pt;
+      line-height: 1.1;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    h2::after {
+      content: "";
+      height: 1px;
+      flex: 1;
+      background: var(--line);
+    }
+
+    .section:nth-of-type(3n) h2,
+    .accent-orange h2 {
+      color: var(--orange);
+    }
+
+    p {
+      margin: 0;
+      font-size: 9.65pt;
+      color: var(--ink);
+    }
+
+    p + p {
+      margin-top: 2.6mm;
+    }
+
+    .lead {
+      font-size: 10.4pt;
+      color: #252b2d;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8mm;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 3.3mm;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 23mm 1fr;
+      gap: 5mm;
+      padding-bottom: 3.3mm;
+      border-bottom: 1px solid var(--soft-line);
+    }
+
+    .item:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .date {
+      color: var(--orange);
+      font-size: 8.8pt;
+      font-weight: 750;
+    }
+
+    h3 {
+      margin: 0 0 1mm;
+      color: var(--ink);
+      font-size: 9.6pt;
+      line-height: 1.25;
+      font-weight: 750;
+    }
+
+    .item p,
+    .small {
+      color: #3f484b;
+      font-size: 8.85pt;
+    }
+
+    ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 1.9mm;
+    }
+
+    li {
+      position: relative;
+      padding-left: 4.4mm;
+      color: #30383b;
+      font-size: 9.1pt;
+    }
+
+    li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 2mm;
+      width: 1.7mm;
+      height: 1.7mm;
+      border-radius: 50%;
+      background: var(--teal);
+    }
+
+    .soft-box {
+      padding: 4.3mm 4.8mm;
+      background: var(--pale);
+      border: 1px solid var(--line);
+    }
+
+    .soft-box h3 {
+      color: var(--teal);
+      margin-bottom: 2.3mm;
+    }
+
+    .note {
+      margin-top: 4mm;
+      padding: 4mm 4.8mm;
+      border-left: 2mm solid var(--orange);
+      background: #fffaf4;
+    }
+
+    .note p {
+      color: #2f3435;
+      font-size: 9.2pt;
+    }
+
+    .footer {
+      margin-top: 8mm;
+      padding-top: 3mm;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      color: #7b8588;
+      font-size: 8pt;
+    }
+
+    @media screen {
+      body {
+        padding: 18px;
+      }
+
+      .page {
+        margin-bottom: 18px;
+        box-shadow: 0 18px 42px rgba(31, 36, 38, 0.08);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="page">
+      <header class="top">
+        <div>
+          <h1>Віктор Демидов</h1>
+          <div class="role">Кандидат на посаду помічника директора Науково-дослідного інституту «Єнамін»</div>
+        </div>
+        <address class="contacts">
+          +380675054709<br />
+          victor.demidov@gmail.com
+        </address>
+      </header>
+
+      <section class="section">
+        <h2>Коротко про мене</h2>
+        <p class="lead">Я фахівець з великим досвідом у координації складних процесів, роботі з експертними командами, організації комунікацій, підготовці матеріалів, запуску проєктів і супроводі навчальних програм.</p>
+      </section>
+
+      <section class="section compact">
+        <h2>Досвід роботи</h2>
+        <div class="timeline">
+          <div class="item">
+            <div class="date">2000</div>
+            <div>
+              <h3>Інститут журналістики Київського національного університету імені Тараса Шевченка</h3>
+              <p>Закінчив Інститут журналістики. Працював журналістом, фотографом, оператором, керівником фотослужби інформаційного агентства «УНІАН».</p>
+            </div>
+          </div>
+          <div class="item">
+            <div class="date">Після 2000</div>
+            <div>
+              <h3>Українські рекламні агенції, продакшени та комерційні команди</h3>
+              <p>Співпрацював з українськими рекламними агенціями, продакшенами та комерційними командами.</p>
+            </div>
+          </div>
+          <div class="item">
+            <div class="date">2008</div>
+            <div>
+              <h3>Власний продакшен рекламного візуалу</h3>
+              <p>Відкрив власний продакшен, де був співвласником і директором. Вів клієнтські проєкти, координував команди, організовував виробничі процеси, працював з документами, бюджетами, дедлайнами та партнерами.</p>
+            </div>
+          </div>
+          <div class="item">
+            <div class="date">2016</div>
+            <div>
+              <h3>Майстерня документального кіно Сергія Буковського</h3>
+              <p>Закінчив майстерню документального кіно в Інституті підвищення кваліфікації при Держтелерадіо України.</p>
+            </div>
+          </div>
+          <div class="item">
+            <div class="date">2019</div>
+            <div>
+              <h3>Fedoriv</h3>
+              <p>Працював керівником документального відеопродакшену.</p>
+            </div>
+          </div>
+          <div class="item">
+            <div class="date">з 2013</div>
+            <div>
+              <h3>Всеукраїнська рада реанімації</h3>
+              <p>Співпрацюю з Всеукраїнською радою реанімації.</p>
+            </div>
+          </div>
+          <div class="item">
+            <div class="date">з 2022</div>
+            <div>
+              <h3>Координатор навчальних програм з тактичної медицини</h3>
+              <p>Це робота на перетині організації, навчання, методології, звітності, комунікації з інструкторами, партнерами та учасниками курсів.</p>
+            </div>
+          </div>
+          <div class="item">
+            <div class="date">Останні роки</div>
+            <div>
+              <h3>AI, LLM, автоматизація, дизайн і структурування інформації</h3>
+              <p>Активно вивчаю і застосовую інструменти штучного інтелекту, LLM, автоматизацію, генерацію зображень, дизайн, структурування інформації та AI-рішення для навчання і корпоративних процесів.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>Віктор Демидов</span>
+        <span>1 / 2</span>
+      </footer>
+    </section>
+
+    <section class="page">
+      <header class="top">
+        <div>
+          <h1>Віктор Демидов</h1>
+          <div class="role">Кандидат на посаду помічника директора НДІ «Єнамін»</div>
+        </div>
+        <address class="contacts">
+          +380675054709<br />
+          victor.demidov@gmail.com
+        </address>
+      </header>
+
+      <section class="section accent-orange">
+        <h2>Чому ця позиція мені цікава</h2>
+        <p>Посада помічника директора Науково-дослідного інституту «Єнамін» для мене цікава як можливість застосувати свій досвід у науковому та освітньому середовищі.</p>
+        <p>Я бачу цю роль як позицію людини, яка допомагає директору тримати операційний контур: документи, зустрічі, листування, внутрішні зв’язки, зовнішню комунікацію, презентаційні матеріали, навчальні ініціативи та щоденну організаційну логіку.</p>
+        <p>Моя сильна сторона полягає в тому, що я швидко розумію складні середовища, знаходжу в них структуру і допомагаю перетворювати розрізнені процеси на зрозумілу систему.</p>
+        <p>У мене різний професійний досвід: медіа, реклама, продакшен, документальне кіно, навчальні програми, тактична медицина, AI-інструменти. Для цієї позиції це може бути практичною перевагою. Я звик працювати там, де треба одночасно бачити людей, зміст, строки, документи, якість і кінцевий результат.</p>
+      </section>
+
+      <section class="section">
+        <h2>Як я бачу свою користь у перші місяці</h2>
+        <p>У перший місяць я міг би зосередитися на тому, щоб зрозуміти робочий ритм директора, типові задачі, потоки документів, ключові контакти, регулярні зустрічі та слабкі місця в комунікації.</p>
+        <div class="grid" style="margin-top: 4mm;">
+          <div class="soft-box">
+            <h3>Система підтримки</h3>
+            <ul>
+              <li>календар зустрічей і контроль домовленостей;</li>
+              <li>шаблони листів українською та англійською;</li>
+              <li>короткі формати протоколів і резюме зустрічей;</li>
+              <li>структура зберігання документів;</li>
+            </ul>
+          </div>
+          <div class="soft-box">
+            <h3>Робочі інструменти</h3>
+            <ul>
+              <li>база контактів і партнерів;</li>
+              <li>система нагадувань і контролю задач;</li>
+              <li>шаблони презентаційних та інформаційних матеріалів;</li>
+              <li>AI-підтримка для рутинних процесів.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="note">
+          <p>Через три місяці моя мета була б проста: директор має витрачати менше часу на організаційну рутину і мати більше ясності в щоденних процесах.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Моя професійна формула для цієї позиції</h2>
+        <p>Я не є хіміком і не претендую на роль наукового експерта. Моя цінність в іншому: я вмію організовувати складні процеси, працювати з експертами, структурувати інформацію, підтримувати комунікацію, готувати матеріали, запускати системи і швидко вчитися.</p>
+        <p>Для Науково-дослідного інституту «Єнамін» я можу бути помічником директора, який поєднує адміністративну уважність, комунікаційний досвід, продакшен-мислення, навички координатора навчальних програм і сучасні AI-інструменти.</p>
+        <p>Мені цікаво випробувати себе саме в такому середовищі, де є наука, освіта, партнерства, дослідження і можливість створювати корисну операційну систему навколо сильних фахівців.</p>
+      </section>
+
+      <footer class="footer">
+        <span>Кандидат на посаду помічника директора НДІ «Єнамін»</span>
+        <span>2 / 2</span>
+      </footer>
+    </section>
+  </main>
+</body>
+</html>
