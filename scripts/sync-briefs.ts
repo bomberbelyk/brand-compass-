@@ -122,7 +122,7 @@ async function run() {
     // ── transcript.md ─────────────────────────────────────────────
     const { data: messages } = await supabase
       .from("interview_messages")
-      .select("role, content, created_at, metadata_json")
+      .select("role, content, created_at, metadata_json, hidden")
       .eq("session_id", session.id)
       .order("created_at", { ascending: true });
 
