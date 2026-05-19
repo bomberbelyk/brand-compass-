@@ -367,13 +367,13 @@ export default function HomePage() {
           }
           // Inject interactive screens — score-based triggers (more reliable than layerComplete alone)
           const score = meta.session?.readiness_score ?? 0;
-          if (score >= 38 || (meta.layerComplete && meta.layer === 1)) {
+          if (score >= 23 || (meta.layerComplete && meta.layer === 1)) {
             setTimeout(() => maybeInjectScreen("mood"), 400);
           }
-          if (score >= 62 || (meta.layer === 2 && meta.layerComplete)) {
+          if (score >= 38 || (meta.layer === 2 && meta.layerComplete)) {
             setTimeout(() => maybeInjectScreen("visual_direction"), 400);
           }
-          if (score >= 80 || meta.layer === 3) {
+          if (score >= 56 || meta.layer === 3) {
             setTimeout(() => maybeInjectScreen("usage"), 400);
           }
         } catch {
