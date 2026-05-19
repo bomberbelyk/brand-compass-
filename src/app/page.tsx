@@ -94,8 +94,18 @@ export default function HomePage() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const shownScreens = useRef<Set<ScreenType>>(new Set());
+  // Screen queued after AI message — injected on next user submit
+  const pendingScreenRef = useRef<ScreenType | null>(null);
+  // User answer stored when a screen intercepts submit
+  const pendingUserAnswerRef = useRef<string>("");
 
-  // Inject an interactive screen if it hasn't been shown yet
+  // Queue a screen to show before the user's next API message
+  function queueScreen(type: ScreenType) {
+    if (shownScreens.current.has(type)) return;
+    if (!pendingScreenRef.current) pendingScreenRef.current = type;
+  }
+
+  // Immediately inject a screen (used only when restoring from history)
   function maybeInjectScreen(type: ScreenType) {
     if (shownScreens.current.has(type)) return;
     shownScreens.current.add(type);
@@ -287,6 +297,17 @@ export default function HomePage() {
       }
 
       if (phase === "interview" && session) {
+        // If a screen is queued — show it now instead of calling API.
+        // User's answer is stored; when they complete the screen, both are sent together.
+        if (pendingScreenRef.current) {
+          const screenType = pendingScreenRef.current;
+          pendingScreenRef.current = null;
+          pendingUserAnswerRef.current = value;
+          shownScreens.current.add(screenType);
+          setMessages(cur => [...cur, { role: "screen", content: "", screenType }]);
+          setIsLoading(false);
+          return;
+        }
         await streamMessage(session.id, value);
       }
     } catch (error) {
@@ -365,17 +386,11 @@ export default function HomePage() {
               localStorage.setItem("bc_session", JSON.stringify({ ...parsed, briefToken: meta.briefToken }));
             } catch { /* ignore */ }
           }
-          // Inject interactive screens — score-based triggers (more reliable than layerComplete alone)
+          // Queue interactive screens — injected on the user's NEXT submit, not after AI message
           const score = meta.session?.readiness_score ?? 0;
-          if (score >= 23 || (meta.layerComplete && meta.layer === 1)) {
-            setTimeout(() => maybeInjectScreen("mood"), 400);
-          }
-          if (score >= 38 || (meta.layer === 2 && meta.layerComplete)) {
-            setTimeout(() => maybeInjectScreen("visual_direction"), 400);
-          }
-          if (score >= 56 || meta.layer === 3) {
-            setTimeout(() => maybeInjectScreen("usage"), 400);
-          }
+          if (score >= 23 || (meta.layerComplete && meta.layer === 1)) queueScreen("mood");
+          if (score >= 38 || (meta.layer === 2 && meta.layerComplete)) queueScreen("visual_direction");
+          if (score >= 56 || meta.layer === 3) queueScreen("usage");
         } catch {
           // Malformed meta — ignore
         }
@@ -417,8 +432,12 @@ export default function HomePage() {
     );
     if (session) {
       setIsLoading(true);
+      // If user's answer was held for the screen, combine both into one API call
+      const held = pendingUserAnswerRef.current;
+      pendingUserAnswerRef.current = "";
+      const payload = held ? `${held}\n\n---\n${formatted}` : formatted;
       setMessages(cur => [...cur, { role: "user", content: formatted }]);
-      streamMessage(session.id, formatted).finally(() => setIsLoading(false));
+      streamMessage(session.id, payload).finally(() => setIsLoading(false));
     }
   }
 
