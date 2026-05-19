@@ -1,9 +1,15 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Request Architect",
-  description: "AI interview that turns vague client requests into working briefs.",
+  title: "Brand Compass",
+  description: "AI-інтерв'ю для бренд-брифу.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({
