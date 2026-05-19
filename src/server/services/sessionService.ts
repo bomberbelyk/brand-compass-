@@ -3,6 +3,25 @@ import { streamInterviewResponse, generateExitSummary } from "./interviewService
 import { analyzeAnswer } from "./analysisService";
 import { generateClientBrief } from "./documentService";
 
+// ─── GitHub Actions sync trigger ──────────────────────────────────────────────
+
+async function triggerGitHubSync() {
+  const token = process.env.GITHUB_ACTIONS_TOKEN;
+  if (!token) return; // optional — skip if not configured
+  await fetch(
+    "https://api.github.com/repos/bomberbelyk/brand-compass-/actions/workflows/sync-briefs.yml/dispatches",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+      body: JSON.stringify({ ref: "main" }),
+    }
+  );
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const EXIT_SIGNALS = ["готово"];
@@ -230,6 +249,9 @@ export async function streamClientMessage(
               .from("client_sessions")
               .update({ status: "completed" })
               .eq("id", sessionId);
+
+            // Trigger GitHub Actions sync so the brief appears in the repo immediately
+            triggerGitHubSync().catch((e) => console.warn("[sync] GitHub trigger failed:", e));
           } catch (briefErr) {
             console.error("[brief] generateClientBrief failed:", briefErr);
           }

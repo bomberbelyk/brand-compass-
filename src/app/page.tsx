@@ -105,9 +105,14 @@ export default function HomePage() {
   useEffect(() => {
     const saved = localStorage.getItem("bc_session");
     if (!saved) return;
-    let stored: { id: string; name?: string } | null = null;
+    let stored: { id: string; name?: string; briefToken?: string } | null = null;
     try { stored = JSON.parse(saved); } catch { return; }
     if (!stored?.id) return;
+    // Restore brief token immediately if cached locally
+    if (stored.briefToken) {
+      setBriefToken(stored.briefToken);
+      setPhase("done");
+    }
 
     setIsLoading(true);
 
@@ -138,7 +143,15 @@ export default function HomePage() {
           ...(data.messages ?? []),
           { role: "assistant", content: data.assistantMessage ?? "Продовжуємо. Що хотіли б доповнити або уточнити?" },
         ]);
-        if (data.briefToken) setBriefToken(data.briefToken);
+        if (data.briefToken) {
+          setBriefToken(data.briefToken);
+          setPhase("done");
+          try {
+            const cur = localStorage.getItem("bc_session");
+            const parsed = cur ? JSON.parse(cur) : {};
+            localStorage.setItem("bc_session", JSON.stringify({ ...parsed, briefToken: data.briefToken }));
+          } catch { /* ignore */ }
+        }
       })
       .catch((err) => {
         console.warn("[resume] fetch error:", err);
@@ -345,15 +358,22 @@ export default function HomePage() {
           if (meta.briefToken) {
             setBriefToken(meta.briefToken);
             setPhase("done");
+            // Persist so it survives page refresh
+            const cur = localStorage.getItem("bc_session");
+            try {
+              const parsed = cur ? JSON.parse(cur) : {};
+              localStorage.setItem("bc_session", JSON.stringify({ ...parsed, briefToken: meta.briefToken }));
+            } catch { /* ignore */ }
           }
-          // Inject interactive screens at layer boundaries
-          if (meta.layerComplete && meta.layer === 1) {
+          // Inject interactive screens — score-based triggers (more reliable than layerComplete alone)
+          const score = meta.session?.readiness_score ?? 0;
+          if (score >= 38 || (meta.layerComplete && meta.layer === 1)) {
             setTimeout(() => maybeInjectScreen("mood"), 400);
           }
-          if (meta.layer === 2 && meta.layerComplete) {
+          if (score >= 62 || (meta.layer === 2 && meta.layerComplete)) {
             setTimeout(() => maybeInjectScreen("visual_direction"), 400);
           }
-          if (meta.layer === 3) {
+          if (score >= 80 || meta.layer === 3) {
             setTimeout(() => maybeInjectScreen("usage"), 400);
           }
         } catch {
