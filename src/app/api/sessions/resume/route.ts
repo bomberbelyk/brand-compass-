@@ -55,14 +55,39 @@ export async function POST(req: NextRequest) {
   try {
     const stateJson = (session.state_json ?? {}) as Record<string, unknown>;
     const readiness = (stateJson.readiness ?? {}) as Record<string, unknown>;
+    const facts = (stateJson.facts ?? {}) as Record<string, unknown>;
+    const project = (stateJson.project ?? {}) as Record<string, unknown>;
     const currentLayer = (readiness.currentLayer as number) ?? 1;
     const score = (readiness.score as number) ?? session.readiness_score ?? 0;
+
+    // Build filled/missing areas so AI knows exactly what to propose next
+    const LAYER_AREAS: Record<number, string[]> = {
+      1: ["initial_request", "business_context", "desired_change", "audience", "deliverables", "style"],
+      2: ["scope", "acceptance_criteria", "risks", "timeline", "budget"],
+      3: ["stakeholders", "technical_constraints", "edge_cases", "revision_process"],
+    };
+    const filledMap: Record<string, unknown> = {
+      initial_request: project.initialRequest,
+      business_context: project.businessDescription,
+      desired_change: project.desiredChange,
+      audience: (facts.audience as unknown[])?.length ? facts.audience : null,
+      deliverables: (facts.deliverables as unknown[])?.length ? facts.deliverables : null,
+      style: (facts.styleDirection as unknown[])?.length ? facts.styleDirection : null,
+      scope: (facts.inScope as unknown[])?.length ? facts.inScope : null,
+      acceptance_criteria: (facts.acceptanceCriteria as unknown[])?.length ? facts.acceptanceCriteria : null,
+      risks: (facts.risks as unknown[])?.length ? facts.risks : null,
+      timeline: facts.timeline,
+      budget: facts.budget,
+    };
+    const areas = LAYER_AREAS[currentLayer] ?? LAYER_AREAS[1];
+    const filledAreas = areas.filter((a) => filledMap[a]);
+    const missingAreas = areas.filter((a) => !filledMap[a]);
 
     const ctx = buildInterviewContext({
       layer: currentLayer,
       readinessScore: score,
-      filledAreas: [],
-      missingAreas: [],
+      filledAreas,
+      missingAreas,
       workingContextMarkdown: session.working_context_markdown ?? "",
       isCheckpoint: false,
     });
@@ -82,7 +107,7 @@ export async function POST(req: NextRequest) {
         { type: "text", text: INTERVIEW_SYSTEM_PROMPT },
         {
           type: "text",
-          text: ctx + `\n\nINSTRUCTION: This is a returning client session. Apply the ## Returning Client behavior from your system prompt.`,
+          text: ctx + `\n\nINSTRUCTION: Returning client. The filled areas above are already covered. The missing areas are what still need to be explored. Pick the single most important missing area, name it explicitly, explain in one sentence why it matters for the designer, and ask a specific question about it. Do NOT ask "що хотіли б доповнити?" — you are the guide, propose the direction yourself.`,
         },
       ],
       messages: historySlice.length > 0
