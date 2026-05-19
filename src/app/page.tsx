@@ -108,10 +108,9 @@ export default function HomePage() {
     let stored: { id: string; name?: string; briefToken?: string } | null = null;
     try { stored = JSON.parse(saved); } catch { return; }
     if (!stored?.id) return;
-    // Restore brief token immediately if cached locally
+    // Restore brief token but keep interview open for continued editing
     if (stored.briefToken) {
       setBriefToken(stored.briefToken);
-      setPhase("done");
     }
 
     setIsLoading(true);
@@ -145,7 +144,7 @@ export default function HomePage() {
         ]);
         if (data.briefToken) {
           setBriefToken(data.briefToken);
-          setPhase("done");
+          // Keep interview open — user returned to continue editing
           try {
             const cur = localStorage.getItem("bc_session");
             const parsed = cur ? JSON.parse(cur) : {};
