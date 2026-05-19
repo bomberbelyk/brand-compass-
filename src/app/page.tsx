@@ -517,7 +517,7 @@ export default function HomePage() {
           <div ref={messagesEndRef} />
         </div>
 
-        {phase === "interview" && (
+        {(phase === "name" || phase === "interview") && (
           <form className="chat-form" onSubmit={handleSubmit}>
             <textarea
               rows={1}
