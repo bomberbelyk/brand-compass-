@@ -11,11 +11,12 @@ const UsageScreen = dynamic(() => import("@/components/screens/UsageScreen"), { 
 type ScreenType = "mood" | "visual_direction" | "usage";
 
 type Message = {
-  role: "assistant" | "user" | "screen";
+  role: "assistant" | "user" | "screen" | "brief";
   content: string;
   streaming?: boolean;
   screenType?: ScreenType;
   screenDone?: boolean;
+  briefToken?: string;
 };
 
 type Phase = "name" | "interview" | "done";
@@ -138,13 +139,14 @@ export default function HomePage() {
         }
         setSession(data.session);
         setPhase("interview");
-        setMessages([
+        const resumeMessages: Message[] = [
           ...(data.messages ?? []),
-          { role: "assistant", content: data.assistantMessage ?? "Продовжуємо. Що хотіли б доповнити або уточнити?" },
-        ]);
+          ...(data.briefToken ? [{ role: "brief" as const, content: "", briefToken: data.briefToken }] : []),
+          { role: "assistant", content: data.assistantMessage ?? "Продовжуємо." },
+        ];
+        setMessages(resumeMessages);
         if (data.briefToken) {
           setBriefToken(data.briefToken);
-          // Keep interview open — user returned to continue editing
           try {
             const cur = localStorage.getItem("bc_session");
             const parsed = cur ? JSON.parse(cur) : {};
@@ -356,11 +358,10 @@ export default function HomePage() {
           if (meta.session) setSession(meta.session);
           if (meta.briefToken) {
             setBriefToken(meta.briefToken);
-            setPhase("done");
-            // Persist so it survives page refresh
-            const cur = localStorage.getItem("bc_session");
+            setMessages(cur => [...cur, { role: "brief", content: "", briefToken: meta.briefToken! }]);
             try {
-              const parsed = cur ? JSON.parse(cur) : {};
+              const cur2 = localStorage.getItem("bc_session");
+              const parsed = cur2 ? JSON.parse(cur2) : {};
               localStorage.setItem("bc_session", JSON.stringify({ ...parsed, briefToken: meta.briefToken }));
             } catch { /* ignore */ }
           }
@@ -476,6 +477,23 @@ export default function HomePage() {
                 </div>
               );
             }
+            if (msg.role === "brief") {
+              return (
+                <div key={i} className="message-row assistant">
+                  <div className="message-bubble assistant brief-ready-bubble">
+                    <p>Бриф готовий. Ви можете переглянути і підтвердити його за посиланням:</p>
+                    <a
+                      href={`/brief/${msg.briefToken}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="brief-link"
+                    >
+                      Переглянути бриф →
+                    </a>
+                  </div>
+                </div>
+              );
+            }
             return (
               <div key={i} className={`message-row ${msg.role}`}>
                 <div className={`message-bubble ${msg.role}${msg.streaming ? " streaming" : ""}`}>
@@ -496,26 +514,10 @@ export default function HomePage() {
             </div>
           )}
 
-          {briefToken && (
-            <div className="message-row assistant">
-              <div className="message-bubble assistant brief-ready-bubble">
-                <p>Бриф готовий. Ви можете переглянути і підтвердити його за посиланням:</p>
-                <a
-                  href={`/brief/${briefToken}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="brief-link"
-                >
-                  Переглянути бриф →
-                </a>
-              </div>
-            </div>
-          )}
-
           <div ref={messagesEndRef} />
         </div>
 
-        {phase !== "done" && (
+        {phase === "interview" && (
           <form className="chat-form" onSubmit={handleSubmit}>
             <textarea
               rows={1}
