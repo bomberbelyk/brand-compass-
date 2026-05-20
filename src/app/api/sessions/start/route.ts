@@ -85,7 +85,12 @@ export async function POST(req: NextRequest) {
         { type: "text", text: INTERVIEW_SYSTEM_PROMPT },
         { type: "text", text: ctx + `\n\nINSTRUCTION: The client has returned to continue the interview. In one message: greet them warmly in one short sentence (say you're continuing from where you left off), then immediately ask the next most important question based on what has already been covered. Do NOT ask about things already discussed.` },
       ],
-      messages: history.length > 0 ? history.slice(-20) : [{ role: "user", content: `Мене звати ${existing.client_name}` }],
+      messages: (() => {
+      const slice = history.length > 0 ? history.slice(-20) : [];
+      if (slice.length === 0) return [{ role: "user" as const, content: `Мене звати ${existing.client_name}. Повертаюсь продовжити.` }];
+      if (slice[slice.length - 1].role === "assistant") slice.push({ role: "user" as const, content: "Я повернувся продовжити роботу над брифом." });
+      return slice;
+    })(),
     });
 
     const block = response.content[0];
