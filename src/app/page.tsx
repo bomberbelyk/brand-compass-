@@ -82,7 +82,7 @@ function getPlaceholder(phase: Phase) {
   return "Напишіть відповідь... (або «готово» щоб завершити)";
 }
 
-export default function HomePage() {
+function HomePageInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([greeting]);
@@ -573,5 +573,13 @@ export default function HomePage() {
         )}
       </section>
     </main>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <React.Suspense>
+      <HomePageInner />
+    </React.Suspense>
   );
 }
