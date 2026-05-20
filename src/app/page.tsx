@@ -2,6 +2,7 @@
 
 import React, { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { useSearchParams, useRouter } from "next/navigation";
 import { BrandMood, LogoType, TypographyStyle, UsageLocation } from "@/types/brandBrief";
 
 const MoodBoardScreen = dynamic(() => import("@/components/screens/MoodBoardScreen"), { ssr: false });
@@ -82,6 +83,8 @@ function getPlaceholder(phase: Phase) {
 }
 
 export default function HomePage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([greeting]);
   const [input, setInput] = useState("");
   const [phase, setPhase] = useState<Phase>("name");
@@ -112,24 +115,17 @@ export default function HomePage() {
     setMessages(cur => [...cur, { role: "screen", content: "", screenType: type }]);
   }
 
-  // Auto-resume saved session on mount
+  // Resume only when coming back via "← Повернутися до редагування" (?resume=sessionId)
   useEffect(() => {
-    const saved = localStorage.getItem("bc_session");
-    if (!saved) return;
-    let stored: { id: string; name?: string; briefToken?: string } | null = null;
-    try { stored = JSON.parse(saved); } catch { return; }
-    if (!stored?.id) return;
-    // Restore brief token but keep interview open for continued editing
-    if (stored.briefToken) {
-      setBriefToken(stored.briefToken);
-    }
+    const sessionId = searchParams.get("resume");
+    if (!sessionId) return; // clean visit → start fresh
 
     setIsLoading(true);
 
     fetch("/api/sessions/resume", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sessionId: stored.id }),
+      body: JSON.stringify({ sessionId }),
     })
       .then(r => {
         if (!r.ok) throw new Error(`resume ${r.status}`);
@@ -144,7 +140,6 @@ export default function HomePage() {
       }) => {
         if (data.error || !data.session) {
           console.warn("[resume] failed:", data.error);
-          localStorage.removeItem("bc_session");
           return;
         }
         setSession(data.session);
@@ -155,18 +150,12 @@ export default function HomePage() {
           { role: "assistant", content: data.assistantMessage ?? "Продовжуємо." },
         ];
         setMessages(resumeMessages);
-        if (data.briefToken) {
-          setBriefToken(data.briefToken);
-          try {
-            const cur = localStorage.getItem("bc_session");
-            const parsed = cur ? JSON.parse(cur) : {};
-            localStorage.setItem("bc_session", JSON.stringify({ ...parsed, briefToken: data.briefToken }));
-          } catch { /* ignore */ }
-        }
+        if (data.briefToken) setBriefToken(data.briefToken);
+        // Clean URL so refresh doesn't re-resume
+        router.replace("/", { scroll: false });
       })
       .catch((err) => {
         console.warn("[resume] fetch error:", err);
-        localStorage.removeItem("bc_session");
       })
       .finally(() => setIsLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
