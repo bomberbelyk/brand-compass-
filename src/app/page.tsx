@@ -261,7 +261,9 @@ function HomePageInner() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: value }),
         });
-        const data = await res.json() as {
+        const text = await res.text();
+        if (!text) throw new Error(`Empty response (status ${res.status})`);
+        let data: {
           session: Session;
           assistantMessage: string;
           hintMessage?: string;
@@ -269,6 +271,11 @@ function HomePageInner() {
           isReturning?: boolean;
           error?: string;
         };
+        try {
+          data = JSON.parse(text);
+        } catch {
+          throw new Error(`Bad JSON (${res.status}): ${text.slice(0, 80)}`);
+        }
         if (!res.ok) throw new Error(data.error ?? "START_FAILED");
         localStorage.setItem("bc_session", JSON.stringify({ id: data.session.id, name: data.session.client_name }));
         setSession(data.session);
