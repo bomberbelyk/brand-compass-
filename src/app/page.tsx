@@ -390,6 +390,14 @@ function HomePageInner() {
         } catch {
           // Malformed meta — ignore
         }
+
+        // Sync to GitHub from client — more reliable than server-side fire-and-forget
+        fetch("/api/sessions/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionId }),
+        }).catch(() => {});
+
         break;
       }
 
