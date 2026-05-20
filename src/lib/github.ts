@@ -18,16 +18,24 @@ async function getFileSha(path: string, token: string): Promise<string | null> {
 }
 
 async function putFile(path: string, content: string, message: string, token: string) {
-  const sha = await getFileSha(path, token);
-  const res = await fetch(`${API}/${path}`, {
-    method: "PUT",
-    headers: headers(token),
-    body: JSON.stringify({
-      message,
-      content: Buffer.from(content).toString("base64"),
-      ...(sha ? { sha } : {}),
-    }),
-  });
+  const encoded = Buffer.from(content).toString("base64");
+
+  const attempt = async () => {
+    const sha = await getFileSha(path, token);
+    return fetch(`${API}/${path}`, {
+      method: "PUT",
+      headers: headers(token),
+      body: JSON.stringify({ message, content: encoded, ...(sha ? { sha } : {}) }),
+    });
+  };
+
+  let res = await attempt();
+
+  // 409 = SHA mismatch (concurrent write) — retry once with fresh SHA
+  if (res.status === 409) {
+    res = await attempt();
+  }
+
   if (!res.ok) {
     const err = await res.text();
     throw new Error(`GitHub PUT ${path}: ${res.status} ${err.slice(0, 120)}`);
