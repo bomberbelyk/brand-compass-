@@ -131,6 +131,31 @@ export async function streamClientMessage(
     metadata_json: { kind: session.current_stage },
   });
 
+  // Push to GitHub immediately after user message so transcript is preserved
+  // even if the browser closes before the AI responds
+  const { data: earlyMessages } = await supabase
+    .from("interview_messages")
+    .select("role, content, hidden")
+    .eq("session_id", sessionId)
+    .order("created_at", { ascending: true });
+
+  const earlyHistory = (earlyMessages ?? [])
+    .filter((m) => !m.hidden && (m.role === "user" || m.role === "assistant"))
+    .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
+
+  pushSessionToGitHub({
+    sessionId,
+    clientName: session.client_name,
+    clientEmail: session.client_email,
+    createdAt: (session as Record<string, unknown>).created_at as string ?? now,
+    lastActivityAt: now,
+    currentStage: session.current_stage,
+    readinessScore: session.readiness_score ?? 0,
+    readinessLevel: session.readiness_level ?? "raw_request",
+    messages: earlyHistory,
+    briefContent: null,
+  }).catch(e => console.warn("[github] early push failed:", e));
+
   // Build conversation history for Sonnet
   const { data: rawMessages } = await supabase
     .from("interview_messages")
