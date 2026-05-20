@@ -249,7 +249,12 @@ export async function streamClientMessage(
           briefContent = briefDoc?.content_markdown ?? null;
         }
 
-        // Push to GitHub — awaited so Vercel doesn't kill it before the stream closes
+        // Push full transcript to GitHub — history + new assistant reply
+        // history was built before AI responded, so append assistantText manually
+        const fullTranscript = [
+          ...history.map(m => ({ role: m.role, content: m.content })),
+          { role: "assistant" as const, content: assistantText },
+        ];
         await pushSessionToGitHub({
           sessionId,
           clientName: session.client_name,
@@ -259,7 +264,7 @@ export async function streamClientMessage(
           currentStage: nextStage,
           readinessScore: analysis.readinessScore,
           readinessLevel: analysis.readinessLevel,
-          messages: history.map(m => ({ role: m.role, content: m.content })),
+          messages: fullTranscript,
           briefContent,
         }).catch(e => console.warn("[github] push failed:", e));
 
