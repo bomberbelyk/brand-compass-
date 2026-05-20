@@ -4,25 +4,6 @@ import { analyzeAnswer } from "./analysisService";
 import { generateClientBrief } from "./documentService";
 import { pushSessionToGitHub } from "@/lib/github";
 
-// ─── GitHub Actions sync trigger ──────────────────────────────────────────────
-
-async function triggerGitHubSync() {
-  const token = process.env.GITHUB_ACTIONS_TOKEN;
-  if (!token) return; // optional — skip if not configured
-  await fetch(
-    "https://api.github.com/repos/bomberbelyk/brand-compass-/actions/workflows/sync-briefs.yml/dispatches",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-      body: JSON.stringify({ ref: "main" }),
-    }
-  );
-}
-
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const EXIT_SIGNALS = ["готово"];
@@ -130,31 +111,6 @@ export async function streamClientMessage(
     content: trimmed,
     metadata_json: { kind: session.current_stage },
   });
-
-  // Push to GitHub immediately after user message so transcript is preserved
-  // even if the browser closes before the AI responds
-  const { data: earlyMessages } = await supabase
-    .from("interview_messages")
-    .select("role, content, hidden")
-    .eq("session_id", sessionId)
-    .order("created_at", { ascending: true });
-
-  const earlyHistory = (earlyMessages ?? [])
-    .filter((m) => !m.hidden && (m.role === "user" || m.role === "assistant"))
-    .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
-
-  pushSessionToGitHub({
-    sessionId,
-    clientName: session.client_name,
-    clientEmail: session.client_email,
-    createdAt: (session as Record<string, unknown>).created_at as string ?? now,
-    lastActivityAt: now,
-    currentStage: session.current_stage,
-    readinessScore: session.readiness_score ?? 0,
-    readinessLevel: session.readiness_level ?? "raw_request",
-    messages: earlyHistory,
-    briefContent: null,
-  }).catch(e => console.warn("[github] early push failed:", e));
 
   // Build conversation history for Sonnet
   const { data: rawMessages } = await supabase
@@ -275,51 +231,37 @@ export async function streamClientMessage(
               .from("client_sessions")
               .update({ status: "completed" })
               .eq("id", sessionId);
-
-            // Trigger GitHub Actions sync so the brief appears in the repo immediately
-            triggerGitHubSync().catch((e) => console.warn("[sync] GitHub trigger failed:", e));
           } catch (briefErr) {
             console.error("[brief] generateClientBrief failed:", briefErr);
           }
         }
 
-        // Push session state + brief (if generated) to GitHub (fire and forget)
+        // Fetch brief content if generated
+        let briefContent: string | null = null;
         if (shouldGenerateBrief && briefToken) {
-          supabase
+          const { data: briefDoc } = await supabase
             .from("generated_documents")
             .select("content_markdown")
             .eq("session_id", sessionId)
             .order("created_at", { ascending: false })
             .limit(1)
-            .maybeSingle()
-            .then(({ data }) => {
-              pushSessionToGitHub({
-                sessionId,
-                clientName: session.client_name,
-                clientEmail: session.client_email,
-                createdAt: (session as Record<string, unknown>).created_at as string ?? now,
-                lastActivityAt: now,
-                currentStage: nextStage,
-                readinessScore: analysis.readinessScore,
-                readinessLevel: analysis.readinessLevel,
-                messages: history.map(m => ({ role: m.role, content: m.content })),
-                briefContent: data?.content_markdown ?? null,
-              }).catch(e => console.warn("[github] push failed:", e));
-            });
-        } else {
-          pushSessionToGitHub({
-            sessionId,
-            clientName: session.client_name,
-            clientEmail: session.client_email,
-            createdAt: (session as Record<string, unknown>).created_at as string ?? now,
-            lastActivityAt: now,
-            currentStage: nextStage,
-            readinessScore: analysis.readinessScore,
-            readinessLevel: analysis.readinessLevel,
-            messages: history.map(m => ({ role: m.role, content: m.content })),
-            briefContent: null,
-          }).catch(e => console.warn("[github] push failed:", e));
+            .maybeSingle();
+          briefContent = briefDoc?.content_markdown ?? null;
         }
+
+        // Push to GitHub — awaited so Vercel doesn't kill it before the stream closes
+        await pushSessionToGitHub({
+          sessionId,
+          clientName: session.client_name,
+          clientEmail: session.client_email,
+          createdAt: (session as Record<string, unknown>).created_at as string ?? now,
+          lastActivityAt: now,
+          currentStage: nextStage,
+          readinessScore: analysis.readinessScore,
+          readinessLevel: analysis.readinessLevel,
+          messages: history.map(m => ({ role: m.role, content: m.content })),
+          briefContent,
+        }).catch(e => console.warn("[github] push failed:", e));
 
         // Send metadata frame at end of stream
         const meta = JSON.stringify({
