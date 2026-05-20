@@ -34,18 +34,24 @@ export async function POST(req: NextRequest) {
     .limit(1)
     .maybeSingle();
 
-  await pushSessionToGitHub({
-    sessionId: session.id,
-    clientName: session.client_name,
-    clientEmail: session.client_email,
-    createdAt: session.created_at,
-    lastActivityAt: session.last_activity_at ?? new Date().toISOString(),
-    currentStage: session.current_stage,
-    readinessScore: session.readiness_score ?? 0,
-    readinessLevel: session.readiness_level ?? "raw_request",
-    messages,
-    briefContent: briefDoc?.content_markdown ?? null,
-  });
+  try {
+    await pushSessionToGitHub({
+      sessionId: session.id,
+      clientName: session.client_name,
+      clientEmail: session.client_email,
+      createdAt: session.created_at,
+      lastActivityAt: session.last_activity_at ?? new Date().toISOString(),
+      currentStage: session.current_stage,
+      readinessScore: session.readiness_score ?? 0,
+      readinessLevel: session.readiness_level ?? "raw_request",
+      messages,
+      briefContent: briefDoc?.content_markdown ?? null,
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[sync] pushSessionToGitHub failed:", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true });
 }
