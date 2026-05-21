@@ -1,10 +1,10 @@
-# Прошник — 🟡 in_progress
+# Прошник — ⚠️ interrupted
 
 | Field | Value |
 |-------|-------|
 | Session ID | `81f54e64-437b-4da7-9d47-52f5e62f98e7` |
 | Email | anon-fd132ff3-82c0-4fd2-9eba-aec145072ef8@reqarch.local |
-| Status | in_progress |
+| Status | interrupted |
 | Stage | layer_1_ongoing |
 | Readiness | 35/100 (raw_request) |
 | Started | 2026-05-19 18:43 UTC |
